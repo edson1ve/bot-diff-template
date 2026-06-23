@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   useProposal,
   useBuy,
+  getDerivAccounts,
+  getActiveLoginId,
 } from '@deriv/core';
 import type {
   ActiveSymbol,
@@ -16,7 +18,7 @@ import type {
 import { useBaseTrading } from '@/hooks/use-base-trading';
 import type { UseBaseTradingParams } from '@/hooks/use-base-trading';
 import { computeDigitStats, getLastDigit } from '../lib/digit-stats';
-import type { ContractMode, TradeType, DigitStats, OpenPosition, ClosedPosition } from '../lib/types';
+import type { ContractMode, TradeType, DigitStats, OpenPosition, ClosedPosition, BuyError } from '../lib/types';
 
 const CONTRACT_TYPES = ['DIGITMATCH', 'DIGITDIFF', 'DIGITOVER', 'DIGITUNDER', 'DIGITEVEN', 'DIGITODD'];
 
@@ -49,7 +51,7 @@ interface UseDigitsTradingReturn {
   buyContract: () => Promise<void>;
   isBuying: boolean;
   buyResult: BuyResult | null;
-  buyError: string | null;
+  buyError: BuyError | null;
   clearBuyResult: () => void;
   openPositions: OpenPosition[];
   closedPositions: ClosedPosition[];
@@ -130,6 +132,20 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
     clearBuyResult,
   } = useBuy(tradingWs, tradingIsConnected);
 
+  // Read account currency from localStorage (set by OAuth flow).
+  // Guarded against SSR — localStorage only exists on the client.
+  const accountCurrency = useMemo(() => {
+    if (typeof window === 'undefined') return 'USD';
+    try {
+      const accounts = getDerivAccounts();
+      const activeId = getActiveLoginId();
+      const active = accounts?.find(a => a.account_id === activeId);
+      return active?.currency ?? 'USD';
+    } catch {
+      return 'USD';
+    }
+  }, []);
+
   // Null out params while a buy is in-flight — forces useProposal to unsubscribe
   // the consumed proposal ID. When isBuying flips back to false, the memo returns
   // real params and useProposal re-subscribes to get a fresh proposal.
@@ -147,10 +163,10 @@ export function useDigitsTrading({ ws, isConnected, isExhausted, isAuthenticated
       duration,
       durationUnit: 't',
       basis: 'stake' as const,
-      currency: 'USD',
+      currency: accountCurrency,
       ...(needsBarrier ? { barrier: selectedDigit } : {}),
     };
-  }, [activeSymbol, contractMode, stake, duration, selectedDigit, isBuying]);
+  }, [activeSymbol, contractMode, stake, duration, selectedDigit, isBuying, accountCurrency]);
 
   const { proposal } = useProposal(tradingWs, tradingIsConnected, proposalParams);
 

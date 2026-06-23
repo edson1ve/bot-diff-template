@@ -4,11 +4,16 @@ import { useState, useCallback } from 'react';
 import type { DerivWS } from '../ws';
 import type { ProposalInfo, BuyResponse, BuyResult } from '../types';
 
+export interface BuyError {
+  message: string;
+  code?: string;
+}
+
 interface UseBuyReturn {
   buyContract: (proposal: ProposalInfo) => Promise<void>;
   isBuying: boolean;
   buyResult: BuyResult | null;
-  buyError: string | null;
+  buyError: BuyError | null;
   clearBuyResult: () => void;
 }
 
@@ -18,7 +23,7 @@ export function useBuy(
 ): UseBuyReturn {
   const [isBuying, setIsBuying] = useState(false);
   const [buyResult, setBuyResult] = useState<BuyResult | null>(null);
-  const [buyError, setBuyError] = useState<string | null>(null);
+  const [buyError, setBuyError] = useState<BuyError | null>(null);
 
   const clearBuyResult = useCallback(() => {
     setBuyResult(null);
@@ -48,7 +53,14 @@ export function useBuy(
         });
       }
     } catch (err) {
-      setBuyError(err instanceof Error ? err.message : 'Purchase failed');
+      if (err instanceof Error) {
+        setBuyError({
+          message: err.message,
+          code: (err as unknown as Record<string, unknown>).code as string | undefined,
+        });
+      } else {
+        setBuyError({ message: 'Purchase failed' });
+      }
     } finally {
       setIsBuying(false);
     }

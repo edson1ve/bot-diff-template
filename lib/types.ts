@@ -29,6 +29,11 @@ export type ContractMode =
 
 export type TradeType = 'matches-differs' | 'over-under' | 'even-odd';
 
+export interface BuyError {
+  message: string;
+  code?: string;
+}
+
 export interface DigitStats {
   /** Count of each digit 0-9 from tick history */
   counts: number[];
