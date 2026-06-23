@@ -1,20 +1,22 @@
 # Trading App — CI/CD Dockerfile (GitHub Actions)
-# Build is done separately in CI, output is in build-output/
+# SDD: Security-Driven Design — read-only root, non-root user, minimal surface
 FROM node:20-alpine AS runner
+
+RUN addgroup --system --gid 1001 nodejs \
+    && adduser --system --uid 1001 nextjs \
+    && rm -rf /sbin/apk /etc/apk /lib/apk /usr/share/apk /var/cache/apk
 
 WORKDIR /app
 
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
-
-COPY build-output/.next/standalone ./
-COPY build-output/.next/static ./.next/static
-COPY build-output/public ./public
+COPY --chown=nextjs:nodejs build-output/.next/standalone ./
+COPY --chown=nextjs:nodejs build-output/.next/static ./.next/static
+COPY --chown=nextjs:nodejs build-output/public ./public
 
 EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
+ENV NODE_ENV=production
 
 USER nextjs
 

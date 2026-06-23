@@ -96,8 +96,9 @@ export function TradeControls({
 }: TradeControlsProps) {
   useEffect(() => {
     if (buyError) {
+      const msg = buyError.message.slice(0, 200);
       toast.error('Purchase Failed', {
-        description: buyError.code ? `[${buyError.code}] ${buyError.message}` : buyError.message,
+        description: buyError.code ? `${msg} (${buyError.code})` : msg,
       });
       onClearBuyResult();
     }

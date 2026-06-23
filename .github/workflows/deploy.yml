@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security audit
+        run: npm audit --audit-level=high
+
       - name: Build Next.js app
         run: npm run build
         env:
@@ -91,8 +94,11 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_KEY }}
+          command_timeout: 120s
           script: |
+            set -euo pipefail
             cd /opt/docker
-            docker pull ${{ secrets.DOCKER_USERNAME }}/trading:latest
+            docker pull "${{ secrets.DOCKER_USERNAME }}/trading:latest"
             docker compose -f docker-compose.trading.yml up -d trading
             docker image prune -f
+            docker compose -f docker-compose.trading.yml ps

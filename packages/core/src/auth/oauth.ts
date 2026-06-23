@@ -154,8 +154,9 @@ export async function exchangeCodeForTokens(params: TokenExchangeParams): Promis
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new OAuthError(`Token exchange failed (${response.status}): ${errorBody}`);
+    const errorBody = await response.text().catch(() => 'unknown');
+    const sanitized = errorBody.length > 200 ? errorBody.slice(0, 200) + '...' : errorBody;
+    throw new OAuthError(`Token exchange failed (${response.status})`);
   }
 
   const tokenData = await response.json();

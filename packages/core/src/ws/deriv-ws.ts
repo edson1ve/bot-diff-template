@@ -220,7 +220,6 @@ export class DerivWS {
         const err = data.error as Record<string, string>;
         const error = new Error(err.message);
         (error as unknown as Record<string, unknown>).code = err.code;
-        (error as unknown as Record<string, unknown>).errorData = err;
         pending.reject(error);
       }
       return;
