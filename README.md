@@ -59,3 +59,5 @@ npm run build
 ```
 
 This produces a fully static export in the `/out` directory. Serve the contents of `/out` from any web server or static file host.
+
+- Join Deriv → enlace de referido https://bit.ly/3Qc9tYi                                                                                           - trading.criptoinversiones.org → link al sitio oficial
