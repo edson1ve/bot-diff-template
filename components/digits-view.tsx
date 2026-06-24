@@ -19,7 +19,7 @@ import type {
   DurationLimits,
   BuyResult,
 } from '@deriv/core';
-import type { ContractMode, TradeType, DigitStats, BuyError } from '../lib/types';
+import type { ContractMode, TradeType, DigitStats } from '../lib/types';
 
 const DIGIT_TRADE_TYPE_OPTIONS: { value: TradeType; label: string }[] = [
   { value: 'matches-differs', label: 'Matches/Differs' },
@@ -68,7 +68,7 @@ export interface DigitsViewProps {
   buyContract: () => Promise<void>;
   isBuying: boolean;
   buyResult: BuyResult | null;
-  buyError: BuyError | null;
+  buyError: string | null;
   clearBuyResult: () => void;
   // Branding (used by preview route; no-op in the real app)
   logoSrc?: string;

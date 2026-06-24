@@ -48,7 +48,7 @@ export default function DigitsPage() {
       buyContract={trading.buyContract}
       isBuying={trading.isBuying}
       buyResult={trading.buyResult}
-      buyError={trading.buyError}
+      buyError={trading.buyError?.message ?? null}
       clearBuyResult={trading.clearBuyResult}
     />
   );

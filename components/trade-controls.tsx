@@ -14,7 +14,6 @@ import type {
   DurationLimits,
   ProposalInfo,
   BuyResult,
-  BuyError,
 } from '../lib/types';
 
 interface TradeControlsProps {
@@ -33,7 +32,7 @@ interface TradeControlsProps {
   onBuy: () => void;
   isBuying: boolean;
   buyResult: BuyResult | null;
-  buyError: BuyError | null;
+  buyError: string | null;
   onClearBuyResult: () => void;
   isAuthenticated?: boolean;
 }
@@ -96,10 +95,7 @@ export function TradeControls({
 }: TradeControlsProps) {
   useEffect(() => {
     if (buyError) {
-      const msg = buyError.message.slice(0, 200);
-      toast.error('Purchase Failed', {
-        description: buyError.code ? `${msg} (${buyError.code})` : msg,
-      });
+      toast.error('Purchase Failed', { description: buyError });
       onClearBuyResult();
     }
   }, [buyError, onClearBuyResult]);
@@ -202,23 +198,11 @@ export function TradeControls({
         )}
       </div>
 
-      {/* Validation warnings */}
-      {proposal && parseFloat(stake) > 0 && parseFloat(stake) < proposal.minStake && (
-        <p className="text-xs text-destructive text-center">
-          Minimum stake is {proposal.minStake.toFixed(2)} USD
-        </p>
-      )}
-      {proposal && proposal.maxPayout > 0 && parseFloat(stake) > proposal.maxPayout && (
-        <p className="text-xs text-destructive text-center">
-          Maximum payout is {proposal.maxPayout.toFixed(2)} USD
-        </p>
-      )}
-
       {/* Buy button — fixed above footer on mobile, inline on desktop */}
       <div className="max-lg:fixed max-lg:bottom-[calc(env(safe-area-inset-bottom)+2.5rem)] max-lg:left-3 max-lg:right-3 lg:static">
         <Button
           className="w-full h-10 rounded-full px-6 sm:h-11 sm:px-8"
-          disabled={!isConnected || !proposal || isBuying || (proposal && parseFloat(stake) < proposal.minStake)}
+          disabled={!isConnected || !proposal || isBuying}
           onClick={onBuy}
         >
           {isBuying
